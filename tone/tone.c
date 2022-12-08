@@ -7,11 +7,13 @@
 #define GIGA 1000000000
 
 #define RANGE 1000
-#define CLOCK 50
+#define CLOCK 25
 
-#define C 262
-#define D 294
-#define E 330
+#define C 523
+#define C2 554
+#define D 587
+#define D2 622
+#define E 659
 #define F 349
 #define G 392
 #define A 440
@@ -46,58 +48,22 @@ int main(int argc, char** argv){
 	{
 		myTone(19,E);
 		delay(300);
-		myTone(19,D);
-		delay(100);
-		myTone(19,C);
-		delay(200);
-		myTone(19,D);
-		delay(200);
-		myTone(19,E);
-		delay(200);
-		myTone(19,E);
-		delay(200);
-		myTone(19,E);
-		delay(400);
-		
-		myTone(19,D);
-		delay(200);
-		myTone(19,D);
-		delay(200);
-		myTone(19,D);
-		delay(400);
-		
-		myTone(19,E);
-		delay(200);
-		myTone(19,E);
-		delay(200);
-		myTone(19,E);
-		delay(400);
-		
+		myTone(19,D2);
+		delay(300);
 		myTone(19,E);
 		delay(300);
-		myTone(19,D);
-		delay(100);
-		myTone(19,C);
-		delay(200);
-		myTone(19,D);
-		delay(200);
-		myTone(19,E);
-		delay(200);
-		myTone(19,E);
-		delay(200);
-		myTone(19,E);
-		delay(400);
-		
-		myTone(19,D);
-		delay(200);
-		myTone(19,D);
-		delay(200);
+		myTone(19,D2);
+		delay(300);
 		myTone(19,E);
 		delay(300);
+		myTone(19,B);
+		delay(300);
 		myTone(19,D);
-		delay(100);
+		delay(300);
 		myTone(19,C);
-		delay(800);
+		delay(300);
+		myTone(19,A);
+		delay(300);
 	}
 
 	initMyTone(19,262);

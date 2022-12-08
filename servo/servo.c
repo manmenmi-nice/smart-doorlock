@@ -12,7 +12,7 @@
 #define RANGE 1024
 #define CLOCK 50
 
-void pwmControl(){
+void pwmControl(int ang){
 
 	pinMode(SERVO, PWM_OUTPUT);
 	pwmSetMode(PWM_MODE_MS);
@@ -22,14 +22,13 @@ void pwmControl(){
 	printf("divisor:%d\n",divisor);
 
 	pwmSetClock(divisor);
-	
-	int ang = 0;
 
 	while(1){
-		scanf("%d", &ang);
+		//scanf("%d", &ang);
 		int duty = ang/180.*(120-18)+18;
 		printf("duty: %d\n", duty);
 		pwmWrite(SERVO, duty);
+		break;
 	}
 
 }
@@ -37,7 +36,7 @@ void pwmControl(){
 int main(int argc, char** argv){
 
 	wiringPiSetupGpio();
-	pwmControl();
+	pwmControl(atoi(argv[1]));
 
 	return 0;
 

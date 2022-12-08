@@ -36,6 +36,11 @@ int one_two_Phase_Rotate(int steps, int dir){
 		}
 	}
 
+	digitalWrite(pin_arr[0], 0);
+	digitalWrite(pin_arr[1], 0);
+	digitalWrite(pin_arr[2], 0);
+	digitalWrite(pin_arr[3], 0);
+  
 	return 0; 
 
 }
@@ -59,7 +64,7 @@ int main(int argc, char* argv[]) {
 	angle = atoi(argv[1]);
 	dir = atoi(argv[2]);
 	//printf("각도, 방향: ");
-	scanf("%d %d", &angle, &dir);
+	//scanf("%d %d", &angle, &dir);
 	one_two_Phase_Rotate_Angle(angle, dir);
 	return 0; 
 }
