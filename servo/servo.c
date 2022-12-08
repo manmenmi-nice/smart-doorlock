@@ -19,14 +19,14 @@ void pwmControl(int ang){
 	pwmSetRange(RANGE);
 
 	int divisor = 19.2*MEGA/CLOCK/(RANGE);
-	printf("divisor:%d\n",divisor);
+	// printf("divisor:%d\n",divisor);
 
 	pwmSetClock(divisor);
 
 	while(1){
 		//scanf("%d", &ang);
 		int duty = ang/180.*(120-18)+18;
-		printf("duty: %d\n", duty);
+		// printf("duty: %d\n", duty);
 		pwmWrite(SERVO, duty);
 		break;
 	}
