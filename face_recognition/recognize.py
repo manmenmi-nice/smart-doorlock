@@ -36,9 +36,15 @@ if __name__=="__main__":
         camera.stop_preview()
 
         unknown_image = face_recognition.load_image_file("capture.jpg")
-        unknown_encoding = face_recognition.face_encodings(unknown_image)[0]
+        unknown_encodings = face_recognition.face_encodings(unknown_image)
 
-        results = face_recognition.compare_faces([known_encoding], unknown_encoding)
+        if len(unknown_encodings) < 1:
+            send.put(MSG_RECOGNIZE_FAIL)
+            continue
+
+
+        results = face_recognition.compare_faces([known_encoding], unknown_encodings[0])
+
         if results[0]:
             send.put(MSG_RECOGNIZE_OK)
         else:
