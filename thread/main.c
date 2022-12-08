@@ -21,7 +21,7 @@ int music(int stat){
 	else if(pid == 0){
 		char buf[1024];
 		sprintf(buf,"%d",stat); 
-		char* cmd[] = {"../tone/tone", buf, NULL};
+		char* cmd[] = {"tone", buf, NULL};
 		execv(cmd[0], cmd);
 	}
 	else{
@@ -39,7 +39,7 @@ void door(int stat){
 		printf("(door %d) complete\n", stat);
 	}
 	else if(pid == 0){
-		char* cmd[] = {"../stepper/stepper", "90", stat==0?"0":"1", NULL};
+		char* cmd[] = {"stepper", "90", stat==0?"0":"1", NULL};
 		execv(cmd[0], cmd);
 	}
 	else{
@@ -56,7 +56,7 @@ void lock(int stat){
 		printf("(lock %d) complete\n", stat);
 	}
 	else if(pid == 0){
-		char* cmd[] = {"../servo/servo", stat==0?"90":"0", NULL};
+		char* cmd[] = {"servo", stat==0?"90":"0", NULL};
 		execv(cmd[0], cmd);
 	}
 	else{
@@ -74,7 +74,7 @@ void oled(int stat){
 	else if(pid == 0){
 		char buf[1024];
 		sprintf(buf,"%d",stat); 
-		char* cmd[] = {"../oled/src/oled", buf, NULL};
+		char* cmd[] = {"oled", buf, NULL};
 		execv(cmd[0], cmd);
 	}
 	else{
