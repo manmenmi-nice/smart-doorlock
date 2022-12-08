@@ -11,7 +11,7 @@
 void open();  // open door
 void close(); // close door
 void set_done(int value);
-bool get_done();
+int get_done();
 
 int music(int stat);
 void door(int stat);
@@ -22,7 +22,7 @@ void* cds(void* argv);
 void* bluetooth(void* argv);
 void init();
 
-bool done;
+int done;
 pthread_mutex_t lock_done;
 pthread_mutex_t lock_door;
 
@@ -56,8 +56,8 @@ int main(){
 		open();
 		close();
 
-		set_done(True);
-		if(get_done() == True) break;
+		set_done(1);
+		if(get_done() == 1) break;
 	}
 	for(int i=0;i<3;i++)
 		pthread_join(child_thread[i], NULL);
@@ -98,7 +98,7 @@ void* cds(void* argv){
 		else printf("Dark!\n");
 		delay(500);
 		cnt++;
-		if(get_done() == True) break;
+		if(get_done() == 1) break;
 	}
 
 	return 0; 
@@ -141,7 +141,7 @@ void* ultraSonic(void* argv){
 		printf( "Distance: %dcm\n", travelTime / 58);
 		delay(200);
 
-		if(get_done() == True) break;
+		if(get_done() == 1) break;
 	}
 }
 
@@ -180,7 +180,7 @@ void* bluetooth(void* argv){
 			serialWrite(fd_serial, dat); //입력 받은 데이터를 다시 보냄 (Echo)
 		}
 		delay (10);
-		if(get_done() == True) break;
+		if(get_done() == 1) break;
 	}
 }
 
@@ -284,14 +284,14 @@ void init(){
 	pthread_mutex_init(&lock_door, NULL);
 }
 
-void set_done(bool value){
+void set_done(int value){
 	pthread_mutex_lock(&lock_done);
 	done = value;
 	pthread_mutex_unlock(&lock_done);
 }
 
-bool get_done(){
-	bool value = false;
+int get_done(){
+	int value = 0;
 	pthread_mutex_lock(&lock_done);
 	value = done;
 	pthread_mutex_unlock(&lock_done);
@@ -304,8 +304,8 @@ void set_brightness(int value){
 	pthread_mutex_unlock(&lock_brightness);
 }
 
-bool get_brightness(){
-	bool value = false;
+int get_brightness(){
+	int value = 0;
 	pthread_mutex_lock(&lock_brightness);
 	value = brightness;
 	pthread_mutex_unlock(&lock_brightness);
@@ -318,8 +318,8 @@ void set_distance(int value){
 	pthread_mutex_unlock(&lock_brightness);
 }
 
-bool get_distance(){
-	bool value = false;
+int get_distance(){
+	int value = 0;
 	pthread_mutex_lock(&lock_dist);
 	value = distance;
 	pthread_mutex_unlock(&lock_dist);
