@@ -314,9 +314,9 @@ int get_brightness(){
 }
 
 void set_distance(int value){
-	pthread_mutex_lock(&lock_brightness);
+	pthread_mutex_lock(&lock_dist);
 	distance = value;
-	pthread_mutex_unlock(&lock_brightness);
+	pthread_mutex_unlock(&lock_dist);
 }
 
 int get_distance(){
