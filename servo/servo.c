@@ -22,7 +22,6 @@ void pwmControl(int ang){
 	printf("divisor:%d\n",divisor);
 
 	pwmSetClock(divisor);
-	
 
 	while(1){
 		//scanf("%d", &ang);

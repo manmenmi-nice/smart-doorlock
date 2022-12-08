@@ -64,7 +64,6 @@ int main(int argc, char** argv){
 		delay(300);
 		myTone(19,A);
 		delay(300);
-
 	}
 
 	initMyTone(19,262);
