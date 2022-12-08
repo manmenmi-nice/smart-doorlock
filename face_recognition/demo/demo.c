@@ -5,8 +5,10 @@
 
 void callback(int result){
     printf("[callback] result: %d\n", result);
-    recognize_release();
-    exit(0);
+    if (result<2) {
+        recognize_release();
+        exit(0);
+    }
 }
 
 int main(){

@@ -7,6 +7,7 @@
 #define MSG_RECOGNIZE_REQUEST "MSG_REC_REQ"
 #define MSG_RECOGNIZE_OK "MSG_REC_OK"
 #define MSG_RECOGNIZE_FAIL "MSG_REC_FAIL"
+#define MSG_PHOTO_TAKEN "MSG_PHOTO_TAKEN"
 
 #define QUEUE_SEND_NAME "/queue_recognize_mosi"
 #define QUEUE_RECEIVE_NAME "/queue_recognize_miso"
@@ -38,13 +39,18 @@ void* msgThread(void* arg){
         if (buf[0])
             printf("[MessageWorker] Received: %s\n", buf);
 
+        if (strcmp(buf, MSG_RECOGNIZE_FAIL)==0){
+            if (cb) cb(0);
+            continue;
+        }
+
         if (strcmp(buf, MSG_RECOGNIZE_OK)==0){
             if (cb) cb(1);
             continue;
         }
 
-        if (strcmp(buf, MSG_RECOGNIZE_FAIL)==0){
-            if (cb) cb(0);
+        if (strcmp(buf, MSG_PHOTO_TAKEN)==0){
+            if (cb) cb(2);
             continue;
         }
     }
