@@ -8,8 +8,8 @@
 #include <time.h>
 #include <wiringSerial.h>
 
-void open();  // open door
-void close(); // close door
+void open_door();  // open door
+void close_door(); // close door
 void set_done(int value);
 int get_done();
 
@@ -27,12 +27,15 @@ pthread_mutex_t lock_done;
 pthread_mutex_t lock_door;
 
 pthread_t child_thread[3];
+
 int brightness;
 pthread_mutex_t lock_brightness;
 int get_brightness();
+void set_brightness(int value);
 int distance;
 pthread_mutex_t lock_dist;
 int get_distance();
+void set_distance(int value);
 
 int main(){
 	init();
@@ -53,8 +56,8 @@ int main(){
 		pthread_exit(NULL);
 	}
 	while(1){
-		open();
-		close();
+		open_door();
+		close_door();
 
 		set_done(1);
 		if(get_done() == 1) break;
@@ -79,11 +82,11 @@ void* cds(void* argv){
 	int adcChannel = 0;
 	if(wiringPiSetupGpio()  < 0 ){
 		printf("wiringPiSetup() is failed\n");
-		return 1; 
+		return NULL;
 	}
 	if ((i2c_fd = wiringPiI2CSetupInterface (I2C_DEV, SLAVE_ADDR_01)) < 0 ){
 	    printf("wiringPi2CSetup Failed: \n");
-		return 1;
+		return NULL;
 	}
 	printf("I2C start....\n"); 
 
@@ -100,8 +103,6 @@ void* cds(void* argv){
 		cnt++;
 		if(get_done() == 1) break;
 	}
-
-	return 0; 
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -114,7 +115,7 @@ void* ultraSonic(void* argv){
 	if(wiringPiSetupGpio () == -1)
 	{
 		printf("Unable GPIO Setup"); 
-		return 1;
+		return NULL;
 	}
 	pinMode (TP, OUTPUT);
 	pinMode (EP, INPUT);
@@ -167,10 +168,10 @@ void serialWrite(const int fd, const unsigned char c)
 void* bluetooth(void* argv){
 	int fd_serial ; //UART2 파일 서술자
 	unsigned char dat; //데이터 임시 저장 변수
-	if (wiringPiSetup () < 0) return 1 ;
+	if (wiringPiSetup () < 0) return NULL;
 	if ((fd_serial = serialOpen (UART2_DEV, BAUD_RATE)) < 0){ //UART2 포트 오픈
 		printf ("Unable to open serial device.\n") ;
-		return;
+		return NULL;
 	}
 	while(1){
 		if(serialDataAvail (fd_serial) ){ //읽을 데이터가 존재한다면,
@@ -186,7 +187,7 @@ void* bluetooth(void* argv){
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-void open(){
+void open_door(){
 	pthread_mutex_lock(&lock_door);
 	oled(2);
 	lock(1);
@@ -194,7 +195,7 @@ void open(){
 	pthread_mutex_unlock(&lock_door);
 }
 
-void close(){
+void close_door(){
 	pthread_mutex_lock(&lock_door);
 	lock(1);
 	door(1);
@@ -277,7 +278,7 @@ void oled(int stat){
 }
 
 void init(){
-	done = false;
+	done = 0;
 	pthread_mutex_init(&lock_brightness, NULL);
 	pthread_mutex_init(&lock_dist, NULL);
 	pthread_mutex_init(&lock_done, NULL);
