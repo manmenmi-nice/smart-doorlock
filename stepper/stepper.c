@@ -18,7 +18,7 @@ int one_two_Phase_Rotate(int steps, int dir){
 
 	if (!dir){
 		for(int i = 0; i<steps; i++){
-			printf("%d\n", i);
+			// printf("%d\n", i);
 			digitalWrite(pin_arr[0], one_phase[i%8][0]); 
 			digitalWrite(pin_arr[1], one_phase[i%8][1]); 
 			digitalWrite(pin_arr[2], one_phase[i%8][2]); 
@@ -27,7 +27,7 @@ int one_two_Phase_Rotate(int steps, int dir){
 		}
 	}else{
 		for(int i = steps; i>0; i--){
-			printf("%d\n", i);
+			// printf("%d\n", i);
 			digitalWrite(pin_arr[0], one_phase[i%8][0]); 
 			digitalWrite(pin_arr[1], one_phase[i%8][1]); 
 			digitalWrite(pin_arr[2], one_phase[i%8][2]); 
