@@ -17,6 +17,7 @@
 
 int main(int argc, char** argv){
 	wiringPiSetupGpio();
+  
 	softToneCreate(TONE);
 
 	switch (atoi(argv[1])){
@@ -36,6 +37,7 @@ int main(int argc, char** argv){
 	default:
 		break;
 	}
+  
 	softToneWrite(TONE, 262);
 
 	return 0;

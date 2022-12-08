@@ -40,7 +40,7 @@ int one_two_Phase_Rotate(int steps, int dir){
 	digitalWrite(pin_arr[1], 0);
 	digitalWrite(pin_arr[2], 0);
 	digitalWrite(pin_arr[3], 0);
-	
+  
 	return 0; 
 
 }
