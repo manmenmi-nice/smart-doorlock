@@ -19,7 +19,7 @@ int main(int argc, char** argv){
 	wiringPiSetupGpio();
 	softToneCreate(TONE);
 
-	switch (atoi(argv[0]) == 0){
+	switch (atoi(argv[1])){
 	case 0:
 		softToneWrite(TONE, E); delay(300);
 		softToneWrite(TONE, D2); delay(300);
