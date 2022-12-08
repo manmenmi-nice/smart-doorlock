@@ -1,9 +1,6 @@
 #include "recognize.h"
-#include <spawn.h>
-#include <sys/wait.h>
 #include <stdio.h>
 #include <mqueue.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
 
@@ -27,23 +24,26 @@ struct mq_attr attr = {
 
 mqd_t rec_mq_send;
 mqd_t rec_mq_receive;
+pthread_t pth;
 
 RECOGNIZE_SET_ON_DONE_CALLBACK cb;
 
 void* msgThread(void* arg){
+    printf("msgThread started\n");
     char buf[BUF_SIZE];
     while(1){
         memset(buf, 0, sizeof(buf));
         mq_receive(rec_mq_receive, buf, sizeof(buf), NULL);
 
-        printf("[MessageWorker] Received: %s\n", buf);
+        if (buf[0])
+            printf("[MessageWorker] Received: %s\n", buf);
 
-        if (strcmp(buf, MSG_RECOGNIZE_OK)){
+        if (strcmp(buf, MSG_RECOGNIZE_OK)==0){
             if (cb) cb(1);
             continue;
         }
 
-        if (strcmp(buf, MSG_RECOGNIZE_FAIL)){
+        if (strcmp(buf, MSG_RECOGNIZE_FAIL)==0){
             if (cb) cb(0);
             continue;
         }
@@ -51,18 +51,25 @@ void* msgThread(void* arg){
 }
 
 pid_t recognize_init(){
+
     rec_mq_send = mq_open(QUEUE_SEND_NAME, O_CREAT|O_WRONLY, 0644, &attr);
     rec_mq_receive = mq_open(QUEUE_RECEIVE_NAME, O_CREAT|O_RDONLY, 0644, &attr);
 
-    if (pthread_create(NULL, NULL, msgThread, NULL)!=0){
-        perror("Could not create message worker thread\n");
-        return 0;
+    pid_t pid;
+    char* argv[] = {"python", "recognize.py", NULL};
+
+    if (posix_spawn(&pid, "/usr/bin/python", NULL, NULL, argv, environ)){
+        perror("Posix_spawn failed");
+        return 1;
     }
 
-    pid_t pid;
-    char* argv[] = {"python3", "recognize.py", NULL};
+    printf("Python Started: pid %d\n",pid);
 
-    posix_spawn(&pid, "python3", NULL, NULL, argv, environ);
+    if (pthread_create(&pth, NULL, msgThread, NULL)!=0){
+        perror("failed to create message worker thread\n");
+        return 1;
+    }
+
     return pid;
 }
 
@@ -72,4 +79,12 @@ int recognize_start(){
 
 int recognize_setOnDoneCallback(RECOGNIZE_SET_ON_DONE_CALLBACK callback){
     cb = callback;
+}
+
+void recognize_release(){
+    pthread_cancel(pth);
+    mq_close(rec_mq_send);
+    mq_unlink(QUEUE_SEND_NAME);
+    mq_close(rec_mq_receive);
+    mq_unlink(QUEUE_RECEIVE_NAME);
 }
