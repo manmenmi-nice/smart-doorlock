@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <wiringSerial.h>
+#include <string.h>
 
 void open_door();  // open door
 void close_door(); // close door
@@ -23,6 +24,7 @@ void* bluetooth(void* argv);
 void init();
 
 int done;
+int door_status;
 pthread_mutex_t lock_done;
 pthread_mutex_t lock_door;
 
@@ -55,16 +57,31 @@ int main(){
 		perror("Bluetooth Thread Creation failed...\n");
 		pthread_exit(NULL);
 	}
+	int detect_human = 0;
 	while(1){
-		open_door();
-		close_door();
+		{ // test
+			open_door();
+			close_door();
+			set_done(1);
+		}
+		if(get_brightness() < 150){ // Bright!
+			
+		}
+		else{ // Dark!
 
-		set_done(1);
+		}
+		if(get_distance() < 100){
+			detect_human++;
+			if(detect_human > 5){
+				// camera 인식 기능
+			}
+		}
+		else detect_human = 0;
 		if(get_done() == 1) break;
 	}
 	for(int i=0;i<3;i++)
 		pthread_join(child_thread[i], NULL);
-	printf("goodbye child.\n");
+	printf("goodbye.\n");
 
 	return 0;
 }
@@ -88,17 +105,17 @@ void* cds(void* argv){
 	    printf("wiringPi2CSetup Failed: \n");
 		return NULL;
 	}
-	printf("I2C start....\n"); 
+	// printf("I2C start....\n"); 
 
 	while(1){
 		wiringPiI2CWrite(i2c_fd, 0x40 | adcChannel);
 		preVal= wiringPiI2CRead(i2c_fd);
 		curVal = wiringPiI2CRead(i2c_fd);
-		printf("[%d] Previous value = %d, ", cnt, preVal); 
-		printf("Current value= %d, ", curVal);
+		// printf("[%d] Previous value = %d, ", cnt, preVal); 
+		// printf("Current value= %d, ", curVal);
 		set_brightness(curVal);
-		if(curVal < threshold) printf("Bright!\n");
-		else printf("Dark!\n");
+		// if(curVal < threshold) printf("Bright!\n");
+		// else printf("Dark!\n");
 		delay(500);
 		cnt++;
 		if(get_done() == 1) break;
@@ -133,13 +150,13 @@ void* ultraSonic(void* argv){
 		travelTime = micros() - startTime;
 
 		if (travelTime >= 38000){
-		    printf("out of range\n");
+		    // printf("out of range\n");
 			delay(200);
 			continue;
 		}
 
 		set_distance(travelTime / 58);
-		printf( "Distance: %dcm\n", travelTime / 58);
+		// printf( "Distance: %dcm\n", travelTime / 58);
 		delay(200);
 
 		if(get_done() == 1) break;
@@ -173,14 +190,18 @@ void* bluetooth(void* argv){
 		printf ("Unable to open serial device.\n") ;
 		return NULL;
 	}
+	char text[1024];
+	int num = 0;
 	while(1){
-		if(serialDataAvail (fd_serial) ){ //읽을 데이터가 존재한다면,
-			dat = serialRead (fd_serial); //버퍼에서 1바이트 값을 읽음
-			printf ("%c", dat);
-			fflush (stdout);
-			serialWrite(fd_serial, dat); //입력 받은 데이터를 다시 보냄 (Echo)
+		num = 0;
+		while(serialDataAvail (fd_serial) ){ //읽을 데이터가 존재한다면,
+			text[num++] = serialRead (fd_serial); //버퍼에서 1바이트 값을 읽음
 		}
-		delay (10);
+		text[num] = "\0";
+		if(strcmp(text, "open"))       open_door();
+		else if(strcmp(text, "close")) close_door();
+		else if(strcmp(text, "bye"))   set_done(1);
+		delay(10);
 		if(get_done() == 1) break;
 	}
 }
@@ -189,19 +210,25 @@ void* bluetooth(void* argv){
 
 void open_door(){
 	pthread_mutex_lock(&lock_door);
-	oled(2);
-	lock(1);
-	door(0);
+	if(door_status == 0){
+		oled(2);
+		lock(1);
+		door(0);
+		door_status = 1;
+	}
 	pthread_mutex_unlock(&lock_door);
 }
 
 void close_door(){
 	pthread_mutex_lock(&lock_door);
-	lock(1);
-	door(1);
-	lock(1);
-	lock(0);
-	oled(1);
+	if(door_status == 1){
+		lock(1);
+		door(1);
+		lock(1);
+		lock(0);
+		oled(1);
+		door_status = 0;
+	}
 	pthread_mutex_unlock(&lock_door);
 }
 
@@ -231,7 +258,7 @@ void door(int stat){
 		pid_t pid2 = music(stat);
 		waitpid(pid, &status, 0);
 		waitpid(pid2, &status, 0);
-		printf("(door %d) complete\n", stat);
+		// printf("(door %d) complete\n", stat);
 	}
 	else if(pid == 0){
 		char* cmd[] = {"stepper", "90", stat==0?"0":"1", NULL};
@@ -248,7 +275,7 @@ void lock(int stat){
 	if(pid>0){
 		usleep(800000);
 		waitpid(pid, &status, 0);
-		printf("(lock %d) complete\n", stat);
+		// printf("(lock %d) complete\n", stat);
 	}
 	else if(pid == 0){
 		char* cmd[] = {"servo", stat==0?"90":"0", NULL};
@@ -264,7 +291,7 @@ void oled(int stat){
 	int status;
 	if(pid>0){
 		waitpid(pid, &status, 0);
-		printf("(oled %d) complete\n", stat);
+		// printf("(oled %d) complete\n", stat);
 	}
 	else if(pid == 0){
 		char buf[1024];
@@ -279,6 +306,9 @@ void oled(int stat){
 
 void init(){
 	done = 0;
+	brightness = 0;
+	distance = 0;
+	door_status = 0;
 	pthread_mutex_init(&lock_brightness, NULL);
 	pthread_mutex_init(&lock_dist, NULL);
 	pthread_mutex_init(&lock_done, NULL);
