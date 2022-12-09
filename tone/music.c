@@ -4,10 +4,8 @@
 
 #include "music.h"
 #include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
 
-int music(int stat){
+pid_t music(int stat){
     pid_t pid = fork();
     if(pid>0){
         return pid;

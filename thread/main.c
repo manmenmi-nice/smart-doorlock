@@ -112,8 +112,11 @@ void open_door(){
 	if(door_status == 0){
 		oled_set(OLED_UNLOCKED);
 		lock(1);
-        music(MUSIC_DOOR_OPEN);
+
+        pid_t pid = music(MUSIC_DOOR_OPEN);
 		door(0);
+        waitpid(pid, NULL, 0);
+
 		door_status = 1;
 	}
 	pthread_mutex_unlock(&lock_door);
@@ -123,8 +126,11 @@ void close_door(){
 	pthread_mutex_lock(&lock_door);
 	if(door_status == 1){
 		lock(1);
-        music(MUSIC_DOOR_CLOSE);
+
+        pid_t pid = music(MUSIC_DOOR_CLOSE);
 		door(1);
+        waitpid(pid, NULL, 0);
+
 		lock(1);
 		lock(0);
         oled_set(OLED_LOCKED);

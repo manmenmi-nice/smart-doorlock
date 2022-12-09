@@ -8,6 +8,8 @@
 #define MUSIC_DOOR_OPEN 0
 #define MUSIC_DOOR_CLOSE 1
 
-int music(int stat);
+#include <unistd.h>
+
+pid_t music(int stat);
 
 #endif //SMART_DOORLOCK_MUSIC_H
