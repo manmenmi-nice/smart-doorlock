@@ -99,6 +99,9 @@ int main(){
 	}
 	for(int i=0;i<3;i++)
 		pthread_join(child_thread[i], NULL);
+
+    recognize_release();
+
 	printf("goodbye.\n");
 
 	return 0;
