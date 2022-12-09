@@ -14,12 +14,12 @@ pthread_mutex_t lock_brightness;
 #define SLAVE_ADDR_01 0x48
 static const char* I2C_DEV = "/dev/i2c-1";
 int i2c_fd;
+const int adcChannel = 0;
 
 void initCDS(){
     pthread_mutex_init(&lock_brightness, NULL);
     if ((i2c_fd = wiringPiI2CSetupInterface (I2C_DEV, SLAVE_ADDR_01)) < 0 ){
         perror("wiringPi2CSetup Failed: \n");
-        return NULL;
     }
 }
 
