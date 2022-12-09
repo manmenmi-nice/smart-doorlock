@@ -61,8 +61,8 @@ int main(){
 
     recognize_init();
     bluetooth_init();
-    initCDS();
-    initUltrasonic();
+    cds_init();
+    ultrasonic_init();
 
 	init();
 
@@ -74,7 +74,7 @@ int main(){
 			set_done(1);
 		}
 
-        int brightness = getBrightness();
+        int brightness = cds_getBrightness();
         printf("[main] Brightness: %d. ", brightness);
 
         if(brightness < 150){ // Bright!
@@ -85,9 +85,9 @@ int main(){
             // TODO: LED 켜기
 		}
 
-        int distance = getDistance();
+        int distance = ultrasonic_getDistance();
         printf("[main] Distance: %d. ", distance);
-		if(getDistance() < 100){
+		if(ultrasonic_getDistance() < 100){
             printf("Obstacle detected\n");
             // TODO: 디바운스 로직 추가
             // TODO: 대기 및 사진 촬영 요청 추가

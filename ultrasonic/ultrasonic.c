@@ -8,7 +8,7 @@
 
 pthread_mutex_t lock_ultrasonic;
 
-void initUltrasonic(){
+void ultrasonic_init(){
     pthread_mutex_init(&lock_ultrasonic, NULL);
 
     if(wiringPiSetupGpio () == -1)
@@ -20,7 +20,7 @@ void initUltrasonic(){
     pinMode (EP, INPUT);
 }
 
-int getDistance(){
+int ultrasonic_getDistance(){
     long startTime;
     long travelTime;
 

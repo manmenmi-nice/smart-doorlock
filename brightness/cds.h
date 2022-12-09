@@ -1,7 +1,7 @@
 #ifndef SMART_DOORLOCK_CDS_H
 #define SMART_DOORLOCK_CDS_H
 
-void initCDS();
-int getBrightness();
+void cds_init();
+int cds_getBrightness();
 
 #endif //SMART_DOORLOCK_CDS_H

@@ -16,14 +16,14 @@ static const char* I2C_DEV = "/dev/i2c-1";
 int i2c_fd;
 const int adcChannel = 0;
 
-void initCDS(){
+void cds_init(){
     pthread_mutex_init(&lock_brightness, NULL);
     if ((i2c_fd = wiringPiI2CSetupInterface (I2C_DEV, SLAVE_ADDR_01)) < 0 ){
         perror("[cds] wiringPi2CSetup Failed: \n");
     }
 }
 
-int getBrightness(){
+int cds_getBrightness(){
     int preVal, curVal;
 
     pthread_mutex_lock(&lock_brightness);
