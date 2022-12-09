@@ -1,7 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "../recognize.h"
+#include <wait.h>
 
-#define QUEUE_NAME
+void callback(int result){
+    printf("[callback] result: %d\n", result);
+    if (result<2) {
+        recognize_release();
+        exit(0);
+    }
+}
 
 int main(){
-    printf("Hello, world!")
+    recognize_setOnDoneCallback(callback);
+    pid_t pid = recognize_init();
+    recognize_start();
+    waitpid(pid, NULL, 0);
 }
