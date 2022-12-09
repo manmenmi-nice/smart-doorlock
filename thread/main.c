@@ -58,7 +58,7 @@ int main(){
 
 	rc = pthread_create(&child_thread,NULL,bluetooth,NULL);
 	if(rc){
-		perror("Bluetooth Thread Creation failed...\n");
+		perror("[main] Failed to create Bluetooth Thread: \n");
 		pthread_exit(NULL);
 	}
 

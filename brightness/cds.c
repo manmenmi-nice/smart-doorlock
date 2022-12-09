@@ -19,7 +19,7 @@ const int adcChannel = 0;
 void initCDS(){
     pthread_mutex_init(&lock_brightness, NULL);
     if ((i2c_fd = wiringPiI2CSetupInterface (I2C_DEV, SLAVE_ADDR_01)) < 0 ){
-        perror("wiringPi2CSetup Failed: \n");
+        perror("[cds] wiringPi2CSetup Failed: \n");
     }
 }
 
