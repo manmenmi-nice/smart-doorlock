@@ -23,6 +23,7 @@ unsigned char serialRead(const int fd)
         return -1;
     return x; //읽어온 데이터 반환
 }
+
 //1Byte 데이터를 송신하는 함수
 void serialWrite(const int fd, const unsigned char c)
 {
@@ -30,6 +31,7 @@ void serialWrite(const int fd, const unsigned char c)
 }
 
 void* bluetoothWorker(void* argv){
+    printf("[Bluetooth.bluetoothWorker] bluetoothWorker started\n");
     char text[1024];
     int num = 0;
 
@@ -44,7 +46,7 @@ void* bluetoothWorker(void* argv){
         if (!text[0]) continue;
 
         text[num] = "\0";
-        printf("[Bluetooth] got %s\n", text);
+        printf("[Bluetooth.bluetoothWorker] got %s\n", text);
 
         if (bluetooth_cb) bluetooth_cb(text);
     }
@@ -53,14 +55,14 @@ void* bluetoothWorker(void* argv){
 pthread_t bluetooth_init(){
     if (wiringPiSetupGpio () < 0) return 0;
     if ((fd_bluetooth = serialOpen (UART2_DEV, BAUD_RATE)) < 0){ //UART2 포트 오픈
-        printf ("Unable to open serial device.\n") ;
+        printf ("[Bluetooth] Unable to open serial device.\n") ;
         return 0;
     }
 
     pthread_t tid;
     int rc = pthread_create(&tid,NULL,bluetoothWorker,NULL);
     if(rc){
-        perror("[main] Failed to create Bluetooth Thread: \n");
+        perror("[Bluetooth] Failed to create Bluetooth Thread: \n");
         pthread_exit(NULL);
     }
 
