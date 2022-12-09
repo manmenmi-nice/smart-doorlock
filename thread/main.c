@@ -1,12 +1,5 @@
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <time.h>
-#include <wiringSerial.h>
 #include <string.h>
 #include <sys/wait.h>
 #include "../face_recognition/recognize.h"
