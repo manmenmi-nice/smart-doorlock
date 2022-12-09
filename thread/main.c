@@ -12,6 +12,7 @@
 #include "../face_recognition/recognize.h"
 #include "../brightness/cds.h"
 #include "../ultrasonic/ultrasonic.h"
+#include "../bluetooth/bluetooth.h"
 
 void open_door();  // open door
 void close_door(); // close door
@@ -22,15 +23,12 @@ int music(int stat);
 void door(int stat);
 void lock(int stat);
 void oled(int stat); // open : 2, close : 1
-void* bluetooth(void* argv);
 void init();
 
 int done;
 int door_status;
 pthread_mutex_t lock_done;
 pthread_mutex_t lock_door;
-
-pthread_t child_thread;
 
 void face_recognition_cb(int result){
     switch (result){
@@ -50,17 +48,23 @@ void face_recognition_cb(int result){
     }
 }
 
+void bluetooth_on_message_cb(const char* msg){
+    printf("[bluetooth_callback] message: %s", msg);
+    if(strcmp(msg, "open") == 0)       open_door();
+    else if(strcmp(msg, "close") == 0) close_door();
+    else if(strcmp(msg, "bye") == 0)   set_done(1);
+}
+
 int main(){
     recognize_setOnDoneCallback(face_recognition_cb);
-    recognize_init();
-	init();
-	int rc;
+    bluetooth_setOnMessageCallback(bluetooth_on_message_cb);
 
-	rc = pthread_create(&child_thread,NULL,bluetooth,NULL);
-	if(rc){
-		perror("[main] Failed to create Bluetooth Thread: \n");
-		pthread_exit(NULL);
-	}
+    recognize_init();
+    bluetooth_init();
+    initCDS();
+    initUltrasonic();
+
+	init();
 
 	while(1){
 		{ // test
@@ -96,64 +100,12 @@ int main(){
 		if(get_done() == 1) break;
 	}
 
-    pthread_join(child_thread, NULL);
-
     recognize_release();
 
 	printf("[main] goodbye.\n");
 
 	return 0;
 }
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-#define BAUD_RATE 115200
-static const char* UART2_DEV = "/dev/ttyAMA1"; //UART2 연결을 위한 장치 파일
-unsigned char serialRead(const int fd); //1Byte 데이터를 수신하는 함수
-void serialWrite(const int fd, const unsigned char c); //1Byte 데이터를 송신하는 함수
-//1Byte 데이터를 수신하는 함수
-unsigned char serialRead(const int fd)
-{
-	unsigned char x;
-	if(read (fd, &x, 1) != 1) //read 함수를 통해 1바이트 읽어옴
-		return -1;
-	return x; //읽어온 데이터 반환
-}
-//1Byte 데이터를 송신하는 함수
-void serialWrite(const int fd, const unsigned char c)
-{
-	write (fd, &c, 1); //write 함수를 통해 1바이트 씀
-}
-void* bluetooth(void* argv){
-    int fd_serial ; //UART2 파일 서술자
-    unsigned char dat; //데이터 임시 저장 변수
-    if (wiringPiSetup () < 0) return NULL;
-    if ((fd_serial = serialOpen (UART2_DEV, BAUD_RATE)) < 0){ //UART2 포트 오픈
-        printf ("Unable to open serial device.\n") ;
-        return NULL;
-    }
-    char text[1024];
-    int num = 0;
-    while(1){
-        if(get_done() == 1) break;
-        memset(text,0,sizeof(text));
-        num = 0;
-
-        while(serialDataAvail (fd_serial) ){ //읽을 데이터가 존재한다면,
-            text[num++] = serialRead (fd_serial); //버퍼에서 1바이트 값을 읽음
-        }
-
-        if (!text[0]) continue;
-
-        text[num] = "\0";
-        printf("[Bluetooth] got %s\n", text);
-        if(strcmp(text, "open") == 0)       open_door();
-        else if(strcmp(text, "close") == 0) close_door();
-        else if(strcmp(text, "bye") == 0)   set_done(1);
-    }
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 void open_door(){
 	pthread_mutex_lock(&lock_door);
@@ -256,8 +208,6 @@ void init(){
 	door_status = 0;
 	pthread_mutex_init(&lock_done, NULL);
 	pthread_mutex_init(&lock_door, NULL);
-    initCDS();
-    initUltrasonic();
 }
 
 void set_done(int value){
