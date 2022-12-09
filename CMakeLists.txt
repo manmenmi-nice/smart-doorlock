@@ -3,7 +3,12 @@ project(smart_doorlock C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(smart_doorlock thread/main.c face_recognition/recognize.c bluetooth/bluetooth.c)
+add_executable(smart_doorlock thread/main.c
+        face_recognition/recognize.c
+        bluetooth/bluetooth.c
+        brightness/cds.c
+        ultrasonic/ultrasonic.c)
+
 add_executable(tone tone/tone.c)
 add_executable(stepper stepper/stepper.c)
 add_executable(servo servo/servo.c)
