@@ -8,7 +8,10 @@
 #include <time.h>
 #include <wiringSerial.h>
 #include <string.h>
+#include <sys/wait.h>
 #include "../face_recognition/recognize.h"
+#include "../brightness/cds.h"
+#include "../ultrasonic/ultrasonic.h"
 
 void open_door();  // open door
 void close_door(); // close door
@@ -19,8 +22,6 @@ int music(int stat);
 void door(int stat);
 void lock(int stat);
 void oled(int stat); // open : 2, close : 1
-void* ultraSonic(void* argv);
-void* cds(void* argv);
 void* bluetooth(void* argv);
 void init();
 
@@ -29,27 +30,22 @@ int door_status;
 pthread_mutex_t lock_done;
 pthread_mutex_t lock_door;
 
-pthread_t child_thread[3];
-
-int brightness;
-pthread_mutex_t lock_brightness;
-int get_brightness();
-void set_brightness(int value);
-int distance;
-pthread_mutex_t lock_dist;
-int get_distance();
-void set_distance(int value);
+pthread_t child_thread;
 
 void face_recognition_cb(int result){
     switch (result){
         case 0:
             printf("OK");
+            // TODO: OLED 업데이트
+            // TODO: 문 열기
             break;
         case 1:
             printf("Fail");
+            // TODO: OLED 업데이트
             break;
         case 2:
             printf("Photo taken");
+            // TODO: OLED 업데이트
             break;
     }
 }
@@ -59,22 +55,13 @@ int main(){
     recognize_init();
 	init();
 	int rc;
-	rc = pthread_create(&child_thread[0],NULL,ultraSonic,NULL);
-	if(rc){
-		perror("UltraSonic Thread Creation failed...\n");
-		pthread_exit(NULL);
-	}
-	rc = pthread_create(&child_thread[1],NULL,cds,NULL);
-	if(rc){
-		perror("CDS Thread Creation failed...\n");
-		pthread_exit(NULL);
-	}
-	rc = pthread_create(&child_thread[2],NULL,bluetooth,NULL);
+
+	rc = pthread_create(&child_thread,NULL,bluetooth,NULL);
 	if(rc){
 		perror("Bluetooth Thread Creation failed...\n");
 		pthread_exit(NULL);
 	}
-	int detect_human = 0;
+
 	while(1){
 		{ // test
             recognize_start();
@@ -82,106 +69,40 @@ int main(){
 			close_door();
 			set_done(1);
 		}
-		if(get_brightness() < 150){ // Bright!
-			
-		}
-		else{ // Dark!
 
+        int brightness = getBrightness();
+        printf("Brightness: %d ", brightness);
+
+        if(brightness < 150){ // Bright!
+            printf("Bright!\n");
+            // TODO: LED 끄기
+		}else{ // Dark!
+            printf("Dark!\n");
+            // TODO: LED 켜기
 		}
-		if(get_distance() < 100){
-			detect_human++;
-			if(detect_human > 5){
-				// camera 인식 기능
-			}
-		}
-		else detect_human = 0;
+
+        int distance = getDistance();
+        printf("Distance: %d", distance);
+		if(getDistance() < 100){
+            printf("Obstacle detected\n");
+            // TODO: 디바운스 로직 추가
+            // TODO: 대기 및 사진 촬영 요청 추가
+            // TODO: OLED 업데이트
+		}else
+            printf("\n");
+
+        sleep(10); // 얼굴 인식 완료시까지 대기
+
 		if(get_done() == 1) break;
 	}
-	for(int i=0;i<3;i++)
-		pthread_join(child_thread[i], NULL);
+
+    pthread_join(child_thread, NULL);
 
     recognize_release();
 
 	printf("goodbye.\n");
 
 	return 0;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-#define SLAVE_ADDR_01 0x48
-static const char* I2C_DEV = "/dev/i2c-1";
-void* cds(void* argv){
-	int i2c_fd;
-	int cnt = 0;
-	int preVal = 0;
-	int curVal = 0;
-	int threshold = 150;
-	int adcChannel = 0;
-	if(wiringPiSetupGpio()  < 0 ){
-		printf("wiringPiSetup() is failed\n");
-		return NULL;
-	}
-	if ((i2c_fd = wiringPiI2CSetupInterface (I2C_DEV, SLAVE_ADDR_01)) < 0 ){
-	    printf("wiringPi2CSetup Failed: \n");
-		return NULL;
-	}
-	// printf("I2C start....\n"); 
-
-	while(1){
-		wiringPiI2CWrite(i2c_fd, 0x40 | adcChannel);
-		preVal= wiringPiI2CRead(i2c_fd);
-		curVal = wiringPiI2CRead(i2c_fd);
-		// printf("[%d] Previous value = %d, ", cnt, preVal); 
-		// printf("Current value= %d, ", curVal);
-		set_brightness(curVal);
-		// if(curVal < threshold) printf("Bright!\n");
-		// else printf("Dark!\n");
-		delay(500);
-		cnt++;
-		if(get_done() == 1) break;
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-#define TP 23
-#define EP 24
-void* ultraSonic(void* argv){
-	long startTime;
-	long travelTime;
-	if(wiringPiSetupGpio () == -1)
-	{
-		printf("Unable GPIO Setup"); 
-		return NULL;
-	}
-	pinMode (TP, OUTPUT);
-	pinMode (EP, INPUT);
-	for(;;)
-	{
-		digitalWrite (TP, LOW);
-		delayMicroseconds(2);
-		digitalWrite (TP, HIGH);
-		delayMicroseconds(10);
-		digitalWrite (TP, LOW);
-
-		while(digitalRead(EP) == LOW);
-		startTime = micros();
-		while(digitalRead(EP) == HIGH);
-		travelTime = micros() - startTime;
-
-		if (travelTime >= 38000){
-		    // printf("out of range\n");
-			delay(200);
-			continue;
-		}
-
-		set_distance(travelTime / 58);
-		// printf( "Distance: %dcm\n", travelTime / 58);
-		delay(200);
-
-		if(get_done() == 1) break;
-	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -332,11 +253,7 @@ void oled(int stat){
 
 void init(){
 	done = 0;
-	brightness = 0;
-	distance = 0;
 	door_status = 0;
-	pthread_mutex_init(&lock_brightness, NULL);
-	pthread_mutex_init(&lock_dist, NULL);
 	pthread_mutex_init(&lock_done, NULL);
 	pthread_mutex_init(&lock_door, NULL);
 }
@@ -352,33 +269,5 @@ int get_done(){
 	pthread_mutex_lock(&lock_done);
 	value = done;
 	pthread_mutex_unlock(&lock_done);
-	return value;
-}
-
-void set_brightness(int value){
-	pthread_mutex_lock(&lock_brightness);
-	brightness = value;
-	pthread_mutex_unlock(&lock_brightness);
-}
-
-int get_brightness(){
-	int value = 0;
-	pthread_mutex_lock(&lock_brightness);
-	value = brightness;
-	pthread_mutex_unlock(&lock_brightness);
-	return value;
-}
-
-void set_distance(int value){
-	pthread_mutex_lock(&lock_dist);
-	distance = value;
-	pthread_mutex_unlock(&lock_dist);
-}
-
-int get_distance(){
-	int value = 0;
-	pthread_mutex_lock(&lock_dist);
-	value = distance;
-	pthread_mutex_unlock(&lock_dist);
 	return value;
 }
