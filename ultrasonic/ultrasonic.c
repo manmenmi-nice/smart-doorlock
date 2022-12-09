@@ -21,6 +21,9 @@ void initUltrasonic(){
 }
 
 int getDistance(){
+    long startTime;
+    long travelTime;
+
     pthread_mutex_lock(&lock_ultrasonic);
 
     digitalWrite (TP, LOW);
