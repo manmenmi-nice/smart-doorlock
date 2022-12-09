@@ -183,27 +183,32 @@ void serialWrite(const int fd, const unsigned char c)
 	write (fd, &c, 1); //write 함수를 통해 1바이트 씀
 }
 void* bluetooth(void* argv){
-	int fd_serial ; //UART2 파일 서술자
-	unsigned char dat; //데이터 임시 저장 변수
-	if (wiringPiSetup () < 0) return NULL;
-	if ((fd_serial = serialOpen (UART2_DEV, BAUD_RATE)) < 0){ //UART2 포트 오픈
-		printf ("Unable to open serial device.\n") ;
-		return NULL;
-	}
-	char text[1024];
-	int num = 0;
-	while(1){
-		num = 0;
-		while(serialDataAvail (fd_serial) ){ //읽을 데이터가 존재한다면,
-			text[num++] = serialRead (fd_serial); //버퍼에서 1바이트 값을 읽음
-		}
-		text[num] = "\0";
-		if(strcmp(text, "open"))       open_door();
-		else if(strcmp(text, "close")) close_door();
-		else if(strcmp(text, "bye"))   set_done(1);
-		delay(10);
-		if(get_done() == 1) break;
-	}
+    int fd_serial ; //UART2 파일 서술자
+    unsigned char dat; //데이터 임시 저장 변수
+    if (wiringPiSetup () < 0) return NULL;
+    if ((fd_serial = serialOpen (UART2_DEV, BAUD_RATE)) < 0){ //UART2 포트 오픈
+        printf ("Unable to open serial device.\n") ;
+        return NULL;
+    }
+    char text[1024];
+    int num = 0;
+    while(1){
+        if(get_done() == 1) break;
+        memset(text,0,sizeof(text));
+        num = 0;
+
+        while(serialDataAvail (fd_serial) ){ //읽을 데이터가 존재한다면,
+            text[num++] = serialRead (fd_serial); //버퍼에서 1바이트 값을 읽음
+        }
+
+        if (!text[0]) continue;
+
+        text[num] = "\0";
+        printf("[Bluetooth] got %s\n", text);
+        if(strcmp(text, "open") == 0)       open_door();
+        else if(strcmp(text, "close") == 0) close_door();
+        else if(strcmp(text, "bye") == 0)   set_done(1);
+    }
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
