@@ -35,16 +35,16 @@ pthread_t child_thread;
 void face_recognition_cb(int result){
     switch (result){
         case 0:
-            printf("OK");
+            printf("[callback] Fail\n");
+            // TODO: OLED 업데이트
+            break;
+        case 1:
+            printf("[callback] OK\n");
             // TODO: OLED 업데이트
             // TODO: 문 열기
             break;
-        case 1:
-            printf("Fail");
-            // TODO: OLED 업데이트
-            break;
         case 2:
-            printf("Photo taken");
+            printf("[callback] Photo taken\n");
             // TODO: OLED 업데이트
             break;
     }
@@ -71,7 +71,7 @@ int main(){
 		}
 
         int brightness = getBrightness();
-        printf("Brightness: %d ", brightness);
+        printf("[main] Brightness: %d. ", brightness);
 
         if(brightness < 150){ // Bright!
             printf("Bright!\n");
@@ -82,7 +82,7 @@ int main(){
 		}
 
         int distance = getDistance();
-        printf("Distance: %d", distance);
+        printf("[main] Distance: %d. ", distance);
 		if(getDistance() < 100){
             printf("Obstacle detected\n");
             // TODO: 디바운스 로직 추가
@@ -100,7 +100,7 @@ int main(){
 
     recognize_release();
 
-	printf("goodbye.\n");
+	printf("[main] goodbye.\n");
 
 	return 0;
 }
