@@ -256,6 +256,8 @@ void init(){
 	door_status = 0;
 	pthread_mutex_init(&lock_done, NULL);
 	pthread_mutex_init(&lock_door, NULL);
+    initCDS();
+    initUltrasonic();
 }
 
 void set_done(int value){
