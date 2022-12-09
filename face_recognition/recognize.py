@@ -18,7 +18,6 @@ if __name__=="__main__":
 
     receive = posixmq.Queue(QUEUE_SEND_NAME, serializer=RawSerializer)
     send = posixmq.Queue(QUEUE_RECEIVE_NAME, serializer=RawSerializer)
-    camera = PiCamera()
 
     known_image = face_recognition.load_image_file("known.jpg")
     known_encoding = face_recognition.face_encodings(known_image)[0]
@@ -31,10 +30,12 @@ if __name__=="__main__":
         if req != MSG_RECOGNIZE_REQUEST:
             continue
 
+        camera = PiCamera()
         camera.start_preview()
         camera.capture("capture.jpg")
         print("Capture done")
         camera.stop_preview()
+        camera.close()
         send.put(MSG_PHOTO_TAKEN)
 
         unknown_image = face_recognition.load_image_file("capture.jpg")
