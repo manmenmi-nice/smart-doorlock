@@ -13,9 +13,9 @@
 #define A 440
 #define B 493
 #define CC 523
-#define CC2 554
+#define CC 554
 #define DD 587
-#define DD2 622
+#define DD 622
 #define EE 659
 
 int main(int argc, char** argv){
@@ -25,14 +25,14 @@ int main(int argc, char** argv){
 
 	switch (atoi(argv[1])){
 	case 1:
-		softToneWrite(TONE, E); delay(300);
-		softToneWrite(TONE, D2); delay(300);
-		softToneWrite(TONE, E); delay(300);
-		softToneWrite(TONE, D2); delay(300);
-		softToneWrite(TONE, E); delay(300);
+		softToneWrite(TONE, EE); delay(300);
+		softToneWrite(TONE, DD); delay(300);
+		softToneWrite(TONE, EE); delay(300);
+		softToneWrite(TONE, DD); delay(300);
+		softToneWrite(TONE, EE); delay(300);
 		softToneWrite(TONE, B); delay(300);
-		softToneWrite(TONE, D); delay(300);
-		softToneWrite(TONE, C); delay(300);
+		softToneWrite(TONE, DD); delay(300);
+		softToneWrite(TONE, CC); delay(300);
 		softToneWrite(TONE, A); delay(300);
 		break;
 	case 0:
