@@ -14,7 +14,7 @@ void initUltrasonic(){
     if(wiringPiSetupGpio () == -1)
     {
         printf("Unable GPIO Setup");
-        return NULL;
+        return;
     }
     pinMode (TP, OUTPUT);
     pinMode (EP, INPUT);
