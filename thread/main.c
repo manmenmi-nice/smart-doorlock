@@ -13,6 +13,7 @@
 #include "../brightness/cds.h"
 #include "../ultrasonic/ultrasonic.h"
 #include "../bluetooth/bluetooth.h"
+#include "../oled/oled.h"
 
 void open_door();  // open door
 void close_door(); // close door
@@ -22,7 +23,6 @@ int get_done();
 int music(int stat);
 void door(int stat);
 void lock(int stat);
-void oled(int stat); // open : 2, close : 1
 void init();
 
 int done;
@@ -110,7 +110,7 @@ int main(){
 void open_door(){
 	pthread_mutex_lock(&lock_door);
 	if(door_status == 0){
-		oled(2);
+		oled_set(OLED_UNLOCKED);
 		lock(1);
 		door(0);
 		door_status = 1;
@@ -125,7 +125,7 @@ void close_door(){
 		door(1);
 		lock(1);
 		lock(0);
-		oled(1);
+        oled_set(OLED_LOCKED);
 		door_status = 0;
 	}
 	pthread_mutex_unlock(&lock_door);
@@ -182,24 +182,6 @@ void lock(int stat){
 	}
 	else{
 		printf("(lock) fork error...\n");
-	}
-}
-
-void oled(int stat){
-	pid_t pid = fork();
-	int status;
-	if(pid>0){
-		waitpid(pid, &status, 0);
-		// printf("(oled %d) complete\n", stat);
-	}
-	else if(pid == 0){
-		char buf[1024];
-		sprintf(buf,"%d",stat); 
-		char* cmd[] = {"oled", buf, NULL};
-		execv(cmd[0], cmd);
-	}
-	else{
-		printf("(oled) fork error...\n");
 	}
 }
 

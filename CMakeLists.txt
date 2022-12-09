@@ -7,7 +7,8 @@ add_executable(smart_doorlock thread/main.c
         face_recognition/recognize.c
         bluetooth/bluetooth.c
         brightness/cds.c
-        ultrasonic/ultrasonic.c)
+        ultrasonic/ultrasonic.c
+        oled/oled.c)
 
 add_executable(tone tone/tone.c)
 add_executable(stepper stepper/stepper.c)
