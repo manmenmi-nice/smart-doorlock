@@ -8,6 +8,7 @@
 #include <time.h>
 #include <wiringSerial.h>
 #include <string.h>
+#include "../face_recognition/recognize.h"
 
 void open_door();  // open door
 void close_door(); // close door
@@ -39,7 +40,23 @@ pthread_mutex_t lock_dist;
 int get_distance();
 void set_distance(int value);
 
+void face_recognition_cb(int result){
+    switch (result){
+        case 0:
+            printf("OK");
+            break;
+        case 1:
+            printf("Fail");
+            break;
+        case 2:
+            printf("Photo taken");
+            break;
+    }
+}
+
 int main(){
+    recognize_setOnDoneCallback(face_recognition_cb);
+    recognize_init();
 	init();
 	int rc;
 	rc = pthread_create(&child_thread[0],NULL,ultraSonic,NULL);
@@ -60,6 +77,7 @@ int main(){
 	int detect_human = 0;
 	while(1){
 		{ // test
+            recognize_start();
 			open_door();
 			close_door();
 			set_done(1);
