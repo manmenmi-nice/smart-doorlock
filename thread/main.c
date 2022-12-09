@@ -15,13 +15,13 @@
 #include "../bluetooth/bluetooth.h"
 #include "../oled/oled.h"
 #include "../servo/lock.h"
+#include "../tone/music.h"
 
 void open_door();  // open door
 void close_door(); // close door
 void set_done(int value);
 int get_done();
 
-int music(int stat);
 void door(int stat);
 void init();
 
@@ -112,6 +112,7 @@ void open_door(){
 	if(door_status == 0){
 		oled_set(OLED_UNLOCKED);
 		lock(1);
+        music(MUSIC_DOOR_OPEN);
 		door(0);
 		door_status = 1;
 	}
@@ -122,6 +123,7 @@ void close_door(){
 	pthread_mutex_lock(&lock_door);
 	if(door_status == 1){
 		lock(1);
+        music(MUSIC_DOOR_CLOSE);
 		door(1);
 		lock(1);
 		lock(0);
@@ -131,33 +133,12 @@ void close_door(){
 	pthread_mutex_unlock(&lock_door);
 }
 
-int music(int stat){
-	pid_t pid = fork();
-	int status;
-	if(pid>0){
-		return pid;
-		//waitpid(pid, &status, 0);
-		//printf("(music %d) complete\n", stat);
-	}
-	else if(pid == 0){
-		char buf[1024];
-		sprintf(buf,"%d",stat); 
-		char* cmd[] = {"tone", buf, NULL};
-		execv(cmd[0], cmd);
-	}
-	else{
-		printf("(music) fork error...\n");
-	}
-}
 
 void door(int stat){
 	pid_t pid = fork();
 	int status;
 	if(pid>0){
-		pid_t pid2 = music(stat);
 		waitpid(pid, &status, 0);
-		waitpid(pid2, &status, 0);
-		// printf("(door %d) complete\n", stat);
 	}
 	else if(pid == 0){
 		char* cmd[] = {"stepper", "90", stat==0?"0":"1", NULL};
