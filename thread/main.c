@@ -14,6 +14,7 @@
 #include "../ultrasonic/ultrasonic.h"
 #include "../bluetooth/bluetooth.h"
 #include "../oled/oled.h"
+#include "../servo/lock.h"
 
 void open_door();  // open door
 void close_door(); // close door
@@ -22,7 +23,6 @@ int get_done();
 
 int music(int stat);
 void door(int stat);
-void lock(int stat);
 void init();
 
 int done;
@@ -165,23 +165,6 @@ void door(int stat){
 	}
 	else{
 		printf("(door) fork error...\n");
-	}
-}
-
-void lock(int stat){
-	pid_t pid = fork();
-	int status;
-	if(pid>0){
-		usleep(800000);
-		waitpid(pid, &status, 0);
-		// printf("(lock %d) complete\n", stat);
-	}
-	else if(pid == 0){
-		char* cmd[] = {"servo", stat==0?"90":"0", NULL};
-		execv(cmd[0], cmd);
-	}
-	else{
-		printf("(lock) fork error...\n");
 	}
 }
 

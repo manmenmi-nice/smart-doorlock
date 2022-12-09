@@ -8,7 +8,8 @@ add_executable(smart_doorlock thread/main.c
         bluetooth/bluetooth.c
         brightness/cds.c
         ultrasonic/ultrasonic.c
-        oled/oled.c)
+        oled/oled.c
+        servo/lock.c)
 
 add_executable(tone tone/tone.c)
 add_executable(stepper stepper/stepper.c)
