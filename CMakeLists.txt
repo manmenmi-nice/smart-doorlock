@@ -10,7 +10,8 @@ add_executable(smart_doorlock thread/main.c
         ultrasonic/ultrasonic.c
         oled/oled.c
         servo/lock.c
-        tone/music.c)
+        tone/music.c
+        stepper/door.c)
 
 add_executable(tone tone/tone.c)
 add_executable(stepper stepper/stepper.c)

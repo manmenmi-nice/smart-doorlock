@@ -16,13 +16,13 @@
 #include "../oled/oled.h"
 #include "../servo/lock.h"
 #include "../tone/music.h"
+#include "../stepper/door.h"
 
 void open_door();  // open door
 void close_door(); // close door
 void set_done(int value);
 int get_done();
 
-void door(int stat);
 void init();
 
 int done;
@@ -139,21 +139,6 @@ void close_door(){
 	pthread_mutex_unlock(&lock_door);
 }
 
-
-void door(int stat){
-	pid_t pid = fork();
-	int status;
-	if(pid>0){
-		waitpid(pid, &status, 0);
-	}
-	else if(pid == 0){
-		char* cmd[] = {"stepper", "90", stat==0?"0":"1", NULL};
-		execv(cmd[0], cmd);
-	}
-	else{
-		printf("(door) fork error...\n");
-	}
-}
 
 void init(){
 	done = 0;
