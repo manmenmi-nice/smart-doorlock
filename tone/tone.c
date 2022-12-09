@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 	softToneCreate(TONE);
 
 	switch (atoi(argv[1])){
-	case 0:
+	case 1:
 		softToneWrite(TONE, E); delay(300);
 		softToneWrite(TONE, D2); delay(300);
 		softToneWrite(TONE, E); delay(300);
@@ -32,7 +32,7 @@ int main(int argc, char** argv){
 		softToneWrite(TONE, C); delay(300);
 		softToneWrite(TONE, A); delay(300);
 		break;
-	case 1:
+	case 0:
 		break;
 	default:
 		break;
