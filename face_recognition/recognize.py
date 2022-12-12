@@ -14,27 +14,28 @@ QUEUE_RECEIVE_NAME = "/queue_recognize_miso"
 
 
 if __name__=="__main__":
-    print("Start")
+    print("[python] Loaded face recognition model")
 
     receive = posixmq.Queue(QUEUE_SEND_NAME, serializer=RawSerializer)
     send = posixmq.Queue(QUEUE_RECEIVE_NAME, serializer=RawSerializer)
-    camera = PiCamera()
 
     known_image = face_recognition.load_image_file("known.jpg")
     known_encoding = face_recognition.face_encodings(known_image)[0]
-    print("Loaded known face encoding")
+    print("[python] Loaded known face encoding")
 
     while True:
         req = receive.get()
-        print("python: got", req)
+        print("[python] got", req)
 
         if req != MSG_RECOGNIZE_REQUEST:
             continue
 
+        camera = PiCamera()
         camera.start_preview()
         camera.capture("capture.jpg")
-        print("Capture done")
+        print("[python] Capture done")
         camera.stop_preview()
+        camera.close()
         send.put(MSG_PHOTO_TAKEN)
 
         unknown_image = face_recognition.load_image_file("capture.jpg")

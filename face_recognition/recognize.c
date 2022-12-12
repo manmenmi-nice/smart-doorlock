@@ -30,14 +30,14 @@ pthread_t pth;
 RECOGNIZE_SET_ON_DONE_CALLBACK cb;
 
 void* msgThread(void* arg){
-    printf("msgThread started\n");
+    printf("[recognize.msgThread] msgThread started\n");
     char buf[BUF_SIZE];
     while(1){
         memset(buf, 0, sizeof(buf));
         mq_receive(rec_mq_receive, buf, sizeof(buf), NULL);
 
         if (buf[0])
-            printf("[MessageWorker] Received: %s\n", buf);
+            printf("[recognize.msgThread] Received: %s\n", buf);
 
         if (strcmp(buf, MSG_RECOGNIZE_FAIL)==0){
             if (cb) cb(0);
@@ -65,14 +65,14 @@ pid_t recognize_init(){
     char* argv[] = {"python", "recognize.py", NULL};
 
     if (posix_spawn(&pid, "/usr/bin/python", NULL, NULL, argv, environ)){
-        perror("Posix_spawn failed");
+        perror("[recognize] Posix_spawn failed");
         return 1;
     }
 
-    printf("Python Started: pid %d\n",pid);
+    printf("[recognize] Python Started: pid %d\n",pid);
 
     if (pthread_create(&pth, NULL, msgThread, NULL)!=0){
-        perror("failed to create message worker thread\n");
+        perror("[recognize] failed to create message worker thread\n");
         return 1;
     }
 
