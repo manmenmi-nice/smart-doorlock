@@ -1,8 +1,15 @@
 <div align="center">
   
-# 스마트한 도어락
+# 🔒 스마트한 도어락 🔑
 
 #### 얼굴 인식 잠금해제 및 원격 제어 가능 도어락
+
+<br>
+
+## 📺Demo📺
+[![Video Label](http://img.youtube.com/vi/sD-BO4y46A0/0.jpg)](https://youtu.be/sD-BO4y46A0?t=0s)
+
+🎞이미지 클릭하면 데모 유튜브 확인 가능합니다
 
 <br>
 
@@ -10,9 +17,17 @@
 <img src="https://img.shields.io/badge/-Embedded%20System-blue?style=for-the-badge">
 <img src="https://img.shields.io/badge/-C--language-brightgreen?style=for-the-badge">
 <img src="https://img.shields.io/badge/-Raspberry--Pi-yellow?style=for-the-badge">
+<img src="https://img.shields.io/badge/-Python-orange?style=for-the-badge">
 
 <br>
 <br>
+
+## 시스템 구조도
+<img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/System_Structural_Diagram.png">
+
+<br>
+<br>
+
 
 ## 작동 기능
 
@@ -65,6 +80,3 @@
 
 <br>
 <br>
-
-## 시스템 구조도
-<img src="https://user-images.githubusercontent.com/109636910/206385375-12f1b475-78a7-4dea-b798-ce0f55916e48.gif">
