@@ -37,6 +37,8 @@ void face_recognition_cb(int result){
         case 1:
             printf("[callback] OK\n");
             open_door();
+            sleep(1);
+            close_door();
             isRecognizerAvailable = 1;
             break;
         case 2:
