@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <wiringPi.h>
 #include "../face_recognition/recognize.h"
 #include "../brightness/cds.h"
 #include "../ultrasonic/ultrasonic.h"
@@ -10,6 +11,8 @@
 #include "../servo/lock.h"
 #include "../tone/music.h"
 #include "../stepper/door.h"
+
+#define LED 26
 
 void open_door();  // open door
 void close_door(); // close door
@@ -44,17 +47,24 @@ void face_recognition_cb(int result){
 }
 
 void bluetooth_on_message_cb(const char* msg){
-    printf("[bluetooth_callback] message: %s", msg);
+    printf("[bluetooth_callback] message: %s\n", msg);
     if(msg[0]=='o')        open_door();
     else if(msg[0]=='c')   close_door();
     else if(msg[0]=='b')   set_done(1);
 }
 
 int main(){
+    wiringPiSetupGpio();
+    pinMode(LED, OUTPUT);
+
     recognize_setOnDoneCallback(face_recognition_cb);
     bluetooth_setOnMessageCallback(bluetooth_on_message_cb);
 
     recognize_init();
+
+    printf("[main] Waiting for face recognizer initialization... (35s)\n");
+    sleep(35);
+
     bluetooth_init();
     cds_init();
     ultrasonic_init();
@@ -63,22 +73,23 @@ int main(){
 
     while(1){
         int brightness = cds_getBrightness();
-        printf("[main] Brightness: %d. ", brightness);
+        //printf("[main] Brightness: %d. ", brightness);
 
         if(brightness < 150){ // Bright!
-            printf("Bright!\n");
-            // TODO: LED 끄기
+            //printf("Bright!\n");
+            digitalWrite(LED, HIGH);
         }else{ // Dark!
-            printf("Dark!\n");
-            // TODO: LED 켜기
+            //printf("Dark!\n");
+            digitalWrite(LED, LOW);
         }
 
         if (isRecognizerAvailable) {
             int distance = ultrasonic_getDistance();
-            printf("[main] Distance: %d. ", distance);
-            if (ultrasonic_getDistance() < 100) {
-                printf("Obstacle detected.");
-                if (ultrasonic_getDistance() < 100) {
+            //printf("[main] Distance: %d\n", distance);
+            if (ultrasonic_getDistance() < 10) {
+                delay(100);
+                if (ultrasonic_getDistance() < 10) {
+                    printf("[main] Obstacle detected\n");
                     oled_set(OLED_TAKING_PHOTO);
                     sleep(1);
                     oled_set(OLED_TAKING_PHOTO_3);
@@ -91,7 +102,6 @@ int main(){
                     isRecognizerAvailable = 0;
                 }
             }
-            printf("\n");
         }
 
         if(get_done() == 1) break;
