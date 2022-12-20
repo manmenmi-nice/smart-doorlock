@@ -77,7 +77,7 @@ int main(){
         int brightness = cds_getBrightness();
         //printf("[main] Brightness: %d. ", brightness);
 
-        if(brightness < 150){ // Bright!
+        if(brightness < 200){ // Bright!
             //printf("Bright!\n");
             digitalWrite(LED, HIGH);
         }else{ // Dark!
