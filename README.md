@@ -3,13 +3,34 @@
 # 🔒 스마트한 도어락 🔑
 
 #### 얼굴 인식 잠금해제 및 원격 제어 가능 도어락
+<br>
+<<img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/%ED%91%9C%EC%A7%80.JPG">
+<br>
 
 <br>
 
 ## 📺Demo📺
-[![Video Label](http://img.youtube.com/vi/sD-BO4y46A0/0.jpg)](https://youtu.be/sD-BO4y46A0?t=0s)
+🎞이미지 클릭하면 데모영상을 유튜브로 확인할 수 있습니다.
 
-🎞이미지 클릭하면 데모 유튜브 확인 가능합니다
+<br>
+
+[![Video Label](http://img.youtube.com/vi/oTXYqvq-VLE/0.jpg)](https://youtu.be/oTXYqvq-VLE?t=0s)
+<br>
+📌 얼굴 인식
+
+<br>
+
+[![Video Label](http://img.youtube.com/vi/_aF4jKydWK8/0.jpg)](https://youtu.be/_aF4jKydWK8?t=0s)
+<br>
+📌 블루투스 통신
+
+<br>
+
+[![Video Label](http://img.youtube.com/vi/mKcttgKRzoE/0.jpg)](https://youtu.be/mKcttgKRzoE?t=0s)
+<br>
+📌 환경 밝기 인식
+
+
 
 <br>
 
