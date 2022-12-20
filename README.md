@@ -43,7 +43,7 @@
 <br>
 <br>
 
-## 시스템 구조도
+## 회로 구성
 <img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/System_Structural_Diagram.png">
 
 <br>
