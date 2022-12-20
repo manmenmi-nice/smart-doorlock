@@ -4,7 +4,7 @@
 
 #### 얼굴 인식 잠금해제 및 원격 제어 가능 도어락
 <br>
-<<img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/%ED%91%9C%EC%A7%80.JPG">
+<img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/%ED%91%9C%EC%A7%80.JPG">
 <br>
 
 <br>
@@ -43,7 +43,7 @@
 <br>
 <br>
 
-## 시스템 구상도
+## 시스템 구성도
 <img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/architecture.png">
 
 <br>
