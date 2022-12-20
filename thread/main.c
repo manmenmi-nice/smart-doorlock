@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <wiringPi.h>
 #include "../face_recognition/recognize.h"
 #include "../brightness/cds.h"
 #include "../ultrasonic/ultrasonic.h"
@@ -10,6 +11,8 @@
 #include "../servo/lock.h"
 #include "../tone/music.h"
 #include "../stepper/door.h"
+
+#define LED 26
 
 void open_door();  // open door
 void close_door(); // close door
@@ -22,134 +25,148 @@ int done;
 int door_status;
 pthread_mutex_t lock_done;
 pthread_mutex_t lock_door;
+int isRecognizerAvailable = 1;
 
 void face_recognition_cb(int result){
     switch (result){
         case 0:
             printf("[callback] Fail\n");
-            // TODO: OLED 업데이트
+            oled_set(OLED_RECOGNITION_FAILED);
+            isRecognizerAvailable = 1;
             break;
         case 1:
             printf("[callback] OK\n");
-            // TODO: OLED 업데이트
-            // TODO: 문 열기
+            open_door();
+            sleep(1);
+            close_door();
+            isRecognizerAvailable = 1;
             break;
         case 2:
             printf("[callback] Photo taken\n");
-            // TODO: OLED 업데이트
+            oled_set(OLED_RECOGNIZING);
             break;
     }
 }
 
 void bluetooth_on_message_cb(const char* msg){
-    printf("[bluetooth_callback] message: %s", msg);
-    if(strcmp(msg, "open") == 0)       open_door();
-    else if(strcmp(msg, "close") == 0) close_door();
-    else if(strcmp(msg, "bye") == 0)   set_done(1);
+    printf("[bluetooth_callback] message: %s\n", msg);
+    if(msg[0]=='o')        open_door();
+    else if(msg[0]=='c')   close_door();
+    else if(msg[0]=='b')   set_done(1);
 }
 
 int main(){
+    wiringPiSetupGpio();
+    pinMode(LED, OUTPUT);
+
     recognize_setOnDoneCallback(face_recognition_cb);
     bluetooth_setOnMessageCallback(bluetooth_on_message_cb);
 
     recognize_init();
+
+    printf("[main] Waiting for face recognizer initialization... (35s)\n");
+    sleep(35);
+
     bluetooth_init();
     cds_init();
     ultrasonic_init();
 
-	init();
+    init();
 
-	while(1){
-		{ // test
-            recognize_start();
-			open_door();
-			close_door();
-			set_done(1);
-		}
-
+    while(1){
         int brightness = cds_getBrightness();
-        printf("[main] Brightness: %d. ", brightness);
+        //printf("[main] Brightness: %d. ", brightness);
 
-        if(brightness < 150){ // Bright!
-            printf("Bright!\n");
-            // TODO: LED 끄기
-		}else{ // Dark!
-            printf("Dark!\n");
-            // TODO: LED 켜기
-		}
+        if(brightness < 200){ // Bright!
+            //printf("Bright!\n");
+            digitalWrite(LED, HIGH);
+        }else{ // Dark!
+            //printf("Dark!\n");
+            digitalWrite(LED, LOW);
+        }
 
-        int distance = ultrasonic_getDistance();
-        printf("[main] Distance: %d. ", distance);
-		if(ultrasonic_getDistance() < 100){
-            printf("Obstacle detected\n");
-            // TODO: 디바운스 로직 추가
-            // TODO: 대기 및 사진 촬영 요청 추가
-            // TODO: OLED 업데이트
-		}else
-            printf("\n");
+        if (isRecognizerAvailable) {
+            int distance = ultrasonic_getDistance();
+            //printf("[main] Distance: %d\n", distance);
+            if (ultrasonic_getDistance() < 10) {
+                delay(100);
+                if (ultrasonic_getDistance() < 10) {
+                    printf("[main] Obstacle detected\n");
+                    oled_set(OLED_TAKING_PHOTO);
+                    sleep(1);
+                    oled_set(OLED_TAKING_PHOTO_3);
+                    sleep(1);
+                    oled_set(OLED_TAKING_PHOTO_2);
+                    sleep(1);
+                    oled_set(OLED_TAKING_PHOTO_1);
+                    sleep(1);
+                    recognize_start();
+                    isRecognizerAvailable = 0;
+                }
+            }
+        }
 
-        sleep(10); // 얼굴 인식 완료시까지 대기
+        if(get_done() == 1) break;
 
-		if(get_done() == 1) break;
-	}
+    }
 
     recognize_release();
 
-	printf("[main] goodbye.\n");
+    printf("[main] goodbye.\n");
 
-	return 0;
+    return 0;
 }
 
 void open_door(){
-	pthread_mutex_lock(&lock_door);
-	if(door_status == 0){
-		oled_set(OLED_UNLOCKED);
-		lock(1);
+    pthread_mutex_lock(&lock_door);
+    if(door_status == 0){
+        oled_set(OLED_UNLOCKED);
+        lock(1);
 
         pid_t pid = music(MUSIC_DOOR_OPEN);
-		door(0);
+        door(0);
         waitpid(pid, NULL, 0);
 
-		door_status = 1;
-	}
-	pthread_mutex_unlock(&lock_door);
+        door_status = 1;
+    }
+    pthread_mutex_unlock(&lock_door);
 }
 
 void close_door(){
-	pthread_mutex_lock(&lock_door);
-	if(door_status == 1){
-		lock(1);
+    pthread_mutex_lock(&lock_door);
+    if(door_status == 1){
+        lock(1);
 
         pid_t pid = music(MUSIC_DOOR_CLOSE);
-		door(1);
+        door(1);
         waitpid(pid, NULL, 0);
 
-		lock(1);
-		lock(0);
+        lock(1);
+        lock(0);
         oled_set(OLED_LOCKED);
-		door_status = 0;
-	}
-	pthread_mutex_unlock(&lock_door);
+        door_status = 0;
+    }
+    pthread_mutex_unlock(&lock_door);
 }
 
 
 void init(){
-	done = 0;
-	door_status = 0;
-	pthread_mutex_init(&lock_done, NULL);
-	pthread_mutex_init(&lock_door, NULL);
+    done = 0;
+    door_status = 0;
+    pthread_mutex_init(&lock_done, NULL);
+    pthread_mutex_init(&lock_door, NULL);
 }
 
 void set_done(int value){
-	pthread_mutex_lock(&lock_done);
-	done = value;
-	pthread_mutex_unlock(&lock_done);
+    pthread_mutex_lock(&lock_done);
+    done = value;
+    pthread_mutex_unlock(&lock_done);
 }
 
 int get_done(){
-	int value = 0;
-	pthread_mutex_lock(&lock_done);
-	value = done;
-	pthread_mutex_unlock(&lock_done);
-	return value;
+    int value = 0;
+    pthread_mutex_lock(&lock_done);
+    value = done;
+    pthread_mutex_unlock(&lock_done);
+    return value;
 }
