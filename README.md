@@ -43,12 +43,17 @@
 <br>
 <br>
 
-## 회로 구성
+## 시스템 구상도
+<img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/architecture.png">
+
+<br>
+<br>
+
+## 회로 구성도
 <img src="https://github.com/manmenmi-nice/smart-doorlock/blob/GPGK-patch-1/System_Structural_Diagram.png">
 
 <br>
 <br>
-
 
 ## 작동 기능
 
@@ -74,7 +79,7 @@
 |잠금 장치 작동|Servo 모터|PWM|모터를 통한 잠금 / 잠금해제|
 
 
-### ✉️ 무선 데이터 통신 ✉️
+### 📱 무선 데이터 통신 📱
 
 |기능명|센서|통신|설명
 |---|---|---|---|
@@ -98,6 +103,15 @@
 ||LED||어두움 감지시 LED 작동|
 ||ADC||아날로그 -> 디지털 신호 변환|
 |스피커|부저|PWM|안내 소리 출력|
+
+<br>
+<br>
+
+## 실행 방법
+|동작|명령어
+|---|---|
+|빌드|sh ./build.sh|
+|실행|sudo ./smart-doorlock|
 
 <br>
 <br>
